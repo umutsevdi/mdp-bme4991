@@ -1,9 +1,12 @@
 #include "server.h"
+#include "util.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 
 void sv_listen(const sv_conf *args, int write_pipe) {
+  long long ts = timestamp();
   int sockfd;
   char *hello = "Hello from server";
   struct sockaddr_in servaddr, cliaddr;
@@ -46,9 +49,8 @@ void sv_listen(const sv_conf *args, int write_pipe) {
       sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM,
              (const struct sockaddr *)&cliaddr, len);
       // Writing to the pipe
-
-      sv_motion motion_data = {
-          .dir_x = 10, .dir_y = 5, .timestamp = time(NULL)};
+      ts = timestamp();
+      sv_motion motion_data = {.dir_x = 10, .dir_y = 5, .timestamp = ts};
       printf("Sending {%d, %d, %lu} to parent\n", motion_data.dir_x,
              motion_data.dir_y, motion_data.timestamp);
       write(write_pipe, (char *)&motion_data, sizeof(motion_data));
