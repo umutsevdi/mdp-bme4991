@@ -1,5 +1,4 @@
 #include "server.h"
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>

@@ -1,10 +1,13 @@
 #ifndef UTIL
 #define UTIL
+
 #include <sys/time.h>
 #include <unistd.h>
+
 /**
- * returns the current time in miliseconds
+ * creates timestamp
+ * @return the current time in milliseconds
  */
 long long timestamp();
 
-#endif /* ifndef UTIL */
+#endif
