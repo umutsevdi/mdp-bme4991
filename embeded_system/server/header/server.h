@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 enum direction {
   DIRECTION_NONE,
   DIRECTION_LEFT,
@@ -37,13 +36,18 @@ typedef struct SV_MOTION_DATA {
 } sv_motion;
 
 /**
- * creates a UDP server, must be executed in a separate
+ * creates a UDP server, must be executed in a process
  * thread
  * @param arg {@link server_config}
  */
-void sv_listen(void *arg);
+void sv_listen(const sv_conf *args, int write_pipe);
+
+/**
+ * the function to implement the tasks while exiting the process.
+ *
+ */
+void sv_atexit(void);
 
 enum direction sv_motion_get_dir(short dir_x, short dir_y);
 
 #endif /* ifndef UDP_SERVER */
-
