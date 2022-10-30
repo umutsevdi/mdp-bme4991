@@ -34,7 +34,7 @@ int main() {
   int sockfd;
   char buffer[MAXLINE];
   char msg[MAXLINE];
-  scanf("%s", msg);
+  fgets(msg, MAXLINE, stdin);
   struct sockaddr_in servaddr;
 
   char *sv_ip_address = get_ip_by_hostname(HOSTNAME);
