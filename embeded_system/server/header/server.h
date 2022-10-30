@@ -28,6 +28,7 @@ enum direction {
 typedef struct SV_SERVER_CONFIG {
     int port;
     int max_line;
+    int should_respond;
 } sv_conf;
 
 typedef struct SV_MOTION_DATA {

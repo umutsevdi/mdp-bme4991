@@ -1,6 +1,6 @@
 #include "util.h"
 
-long long timestamp() {
+long long UTIL_timestamp() {
   struct timeval tv;
 
   gettimeofday(&tv, NULL);

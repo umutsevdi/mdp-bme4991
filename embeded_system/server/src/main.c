@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#define PORT 8080
+#define MAX_LINE 1024
+
 void my_atexit(void) { printf("Parent said bye\n"); }
 
 int main(int argc, char *argv[]) {
@@ -14,6 +17,8 @@ int main(int argc, char *argv[]) {
 
   pid_t childpid = fork();
   if (!childpid) {
+    pid_t pid = getpid();
+    printf("%i\tStarting up embeded device\n", pid);
     close(sv_pipe[1]);
     // embedded_program_run(pipe[0]); <-- read pipe
     // TODO insert the code of the car here
@@ -21,22 +26,22 @@ int main(int argc, char *argv[]) {
     // parent
     while (1) {
       //      sleep(1);
-      printf("%i Parent is waiting for child's message:\n", getpid());
+      printf("%i\tWaiting for the child\n", pid);
 
-      char readbuffer[1024];
-      bzero(readbuffer, 1024);
-      sv_motion motion_data;
-      int n = read(sv_pipe[0], (char *)&motion_data, sizeof(motion_data));
+      char readbuffer[MAX_LINE];
+      bzero(readbuffer, MAX_LINE);
+      int n = read(sv_pipe[0], readbuffer, MAX_LINE);
       readbuffer[n] = '\n';
-      printf("Parent received message from the child: {%d, %d, %lu}\n",
-             motion_data.dir_x, motion_data.dir_y, motion_data.timestamp);
+      printf("%i\tMessage from child: %s\n", pid, readbuffer);
     }
   } else {
+    printf("%i\tStarting UDP server{port: %d, buffer_size: %d}\n", getpid(),
+           PORT, MAX_LINE);
     close(sv_pipe[0]);
-    printf("Starting UDP server, %d\n", getpid());
-    const sv_conf server_config = {.port = 8080, .max_line = 1024};
+    const sv_conf server_config = {
+        .port = PORT, .max_line = MAX_LINE, .should_respond = 0
+    };
     sv_listen(&server_config, sv_pipe[1]);
-    printf("end of process\n");
   }
 
   return 0;

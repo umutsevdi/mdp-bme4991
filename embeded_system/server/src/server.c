@@ -1,60 +1,64 @@
 #include "server.h"
 #include "util.h"
 #include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
-
 void sv_listen(const sv_conf *args, int write_pipe) {
-    long long ts = timestamp();
-    int sockfd;
-    char *hello = "Hello from server";
-    struct sockaddr_in servaddr, cliaddr;
+  const pid_t pid = getpid();
+  long long ts = UTIL_timestamp();
+  int sockfd;
+  struct sockaddr_in servaddr, cliaddr;
 
-    // Creating socket file descriptor
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket creation failed");
-        exit(EXIT_FAILURE);
+  // Creating socket file descriptor
+  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    perror("socket creation failed");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(&servaddr, 0, sizeof(servaddr));
+  memset(&cliaddr, 0, sizeof(cliaddr));
+
+  // Filling server information
+  servaddr.sin_family = AF_INET; // IPv4
+  servaddr.sin_addr.s_addr = INADDR_ANY;
+  servaddr.sin_port = htons(args->port);
+
+  // Bind the socket with the server address
+  if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+    perror("bind failed");
+    exit(EXIT_FAILURE);
+  }
+
+  int len, n;
+
+  len = sizeof(cliaddr); // len is value/result
+  while (1) {
+    printf("%i\tChild is listening\n", pid);
+    // @TODO add threading here maybe
+    char buffer[args->max_line];
+    n = recvfrom(sockfd, (char *)buffer, args->max_line, MSG_WAITALL,
+                 (struct sockaddr *)&cliaddr, &len);
+    // @TODO Handle this text processing in a separate thread
+    if (n > 0) {
+      // Set buffer as `null terminated string`
+      buffer[n] = '\0';
+
+      printf("%i\treceived{%d:%d}: %s\n", pid, cliaddr.sin_addr.s_addr,
+             cliaddr.sin_port, buffer);
+
+      if (args->should_respond) {
+        char *response = "OK";
+        sendto(sockfd, response, strlen(response), MSG_CONFIRM,
+               (const struct sockaddr *)&cliaddr, len);
+        printf("%i\tResponse sent to the client\n", pid);
+      }
+      // Writing to the pipe
+      ts = UTIL_timestamp();
+      printf("%i\tTransferring to parent\n", pid);
+      write(write_pipe, buffer, strlen(buffer));
     }
-
-    memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
-
-    // Filling server information
-    servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;
-    servaddr.sin_port = htons(args->port);
-
-    // Bind the socket with the server address
-    if (bind(sockfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
-    }
-
-    int len, n;
-
-    len = sizeof(cliaddr); // len is value/result
-    while (1) {
-        // @TODO add threading here maybe
-        char buffer[args->max_line];
-        n = recvfrom(sockfd, (char *) buffer, args->max_line, MSG_WAITALL,
-                     (struct sockaddr *) &cliaddr, &len);
-        // @TODO Handle this text processing in a separate thread
-        if (n > 0) {
-            // Set buffer as `null terminated string`
-            buffer[n] = '\0';
-
-            printf("Child: received from %d:%d\t: %s\n", cliaddr.sin_addr.s_addr,
-                   cliaddr.sin_port, buffer);
-            sendto(sockfd, (const char *) hello, strlen(hello), MSG_CONFIRM,
-                   (const struct sockaddr *) &cliaddr, len);
-            // Writing to the pipe
-            ts = timestamp();
-            sv_motion motion_data = {.dir_x = 10, .dir_y = 5, .timestamp = ts};
-            printf("Sending {%d, %d, %lu} to parent\n", motion_data.dir_x,
-                   motion_data.dir_y, motion_data.timestamp);
-            write(write_pipe, (char *) &motion_data, sizeof(motion_data));
-            printf("Response sent\n");
-        }
-    }
+  }
 }
 
 sv_motion *parse(char *buffer) { return NULL; }
