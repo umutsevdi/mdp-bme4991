@@ -1,19 +1,16 @@
 // Client side implementation of UDP client-server model
+#include "server/header/util.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
+
 #define PORT 8080
 
 #define HOSTNAME "pi.local"
-#define MAXLINE 1024
-#define EXPECT_RESPONSE 0
+#define MAXLINE 256 
 
 /**
  * Gets the IP address of the given host name
@@ -34,7 +31,13 @@ int main() {
   int sockfd;
   char buffer[MAXLINE];
   char msg[MAXLINE];
-  fgets(msg, MAXLINE, stdin);
+  sv_motion data;
+
+  scanf("%d", &data.dir);
+  data.timestamp = util_ts();
+  data.c_bit = util_mkbit(data.dir, data.timestamp);
+  printf("data{%d %lu %d}\n",data.dir,data.timestamp,data.c_bit);
+
   struct sockaddr_in servaddr;
 
   char *sv_ip_address = get_ip_by_hostname(HOSTNAME);
@@ -56,21 +59,13 @@ int main() {
   servaddr.sin_port = htons(PORT);
   servaddr.sin_addr.s_addr = inet_addr(sv_ip_address);
 
-  int msg_status = sendto(sockfd, (const char *)msg, strlen(msg), MSG_CONFIRM,
-                          (const struct sockaddr *)&servaddr, sizeof(servaddr));
+  int msg_status =
+      sendto(sockfd, (const char *)&data, sizeof(data), MSG_CONFIRM,
+             (const struct sockaddr *)&servaddr, sizeof(servaddr));
   if (msg_status == -1) {
     perror("Error while sending the data\n");
   }
   printf("Message sent to server\n");
-
-  if (EXPECT_RESPONSE) {
-    int n, len;
-    n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL,
-                 (struct sockaddr *)&servaddr, &len);
-    buffer[n] = '\0';
-    printf("Server : %s\n", buffer);
-  }
-
   close(sockfd);
   return 0;
 }

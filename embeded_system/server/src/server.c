@@ -1,12 +1,8 @@
 #include "server.h"
 #include "util.h"
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
+
 void sv_listen(const sv_conf *args, int write_pipe) {
-  const pid_t pid = getpid();
-  long long ts = UTIL_timestamp();
+  long long ts = util_ts();
   int sockfd;
   struct sockaddr_in servaddr, cliaddr;
 
@@ -34,29 +30,27 @@ void sv_listen(const sv_conf *args, int write_pipe) {
 
   len = sizeof(cliaddr); // len is value/result
   while (1) {
-    printf("%i\tChild is listening\n", pid);
-    // @TODO add threading here maybe
+    printf("%i\tChild is listening\n", args->pid);
     char buffer[args->max_line];
     n = recvfrom(sockfd, (char *)buffer, args->max_line, MSG_WAITALL,
                  (struct sockaddr *)&cliaddr, &len);
-    // @TODO Handle this text processing in a separate thread
     if (n > 0) {
+      printf("%i\treceived from {%d:%d}: %s\n", args->pid,
+             cliaddr.sin_addr.s_addr, cliaddr.sin_port, buffer);
       // Set buffer as `null terminated string`
-      buffer[n] = '\0';
+      sv_motion data;
+      memcpy(&data, buffer, sizeof(sv_motion));
 
-      printf("%i\treceived{%d:%d}: %s\n", pid, cliaddr.sin_addr.s_addr,
-             cliaddr.sin_port, buffer);
-
-      if (args->should_respond) {
-        char *response = "OK";
-        sendto(sockfd, response, strlen(response), MSG_CONFIRM,
-               (const struct sockaddr *)&cliaddr, len);
-        printf("%i\tResponse sent to the client\n", pid);
+      if (util_mkbit(data.dir, data.timestamp) == data.c_bit) {
+        printf("Valid Data: %d %lu %d", data.dir, data.timestamp, data.c_bit);
       }
+
+      printf("%i\tvalid Data: %d %lu %d", args->pid, data.dir, data.timestamp,
+             data.c_bit);
+
       // Writing to the pipe
-      ts = UTIL_timestamp();
-      printf("%i\tTransferring to parent\n", pid);
-      write(write_pipe, buffer, strlen(buffer));
+      printf("%i\tTransferring to parent\n", args->pid);
+      write(write_pipe, &data, sizeof(sv_motion));
     }
   }
 }
