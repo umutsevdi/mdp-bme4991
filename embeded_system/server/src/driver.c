@@ -14,6 +14,6 @@ void dv_drive(const dv_conf *args, int read_pipe) {
     memcpy(&data, readbuffer, sizeof(sv_motion));
 
     printf("%i\tMessage from child: %s\n", args->pid, readbuffer);
-    printf("%i::data{%d %lu %d}\n",args->pid, data.dir,data.timestamp,data.c_bit);
+    printf("%i\tdata{%d %d %d}\n",args->pid, data.dir,data.timestamp,data.c_bit);
   }
 }

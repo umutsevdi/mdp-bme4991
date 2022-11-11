@@ -30,7 +30,7 @@ void sv_listen(const sv_conf *args, int write_pipe) {
 
   len = sizeof(cliaddr); // len is value/result
   while (1) {
-    printf("%i\tChild is listening\n", args->pid);
+    printf("%i\tchild is listening\n", args->pid);
     char buffer[args->max_line];
     n = recvfrom(sockfd, (char *)buffer, args->max_line, MSG_WAITALL,
                  (struct sockaddr *)&cliaddr, &len);
@@ -42,14 +42,12 @@ void sv_listen(const sv_conf *args, int write_pipe) {
       memcpy(&data, buffer, sizeof(sv_motion));
 
       if (util_mkbit(data.dir, data.timestamp) == data.c_bit) {
-        printf("Valid Data: %d %lu %d", data.dir, data.timestamp, data.c_bit);
+        printf("%i\tvalid data:{%d %d %d}\n", args->pid, data.dir,
+               data.timestamp, data.c_bit);
       }
 
-      printf("%i\tvalid Data: %d %lu %d", args->pid, data.dir, data.timestamp,
-             data.c_bit);
-
       // Writing to the pipe
-      printf("%i\tTransferring to parent\n", args->pid);
+      printf("%i\ttransferring to parent\n", args->pid);
       write(write_pipe, &data, sizeof(sv_motion));
     }
   }

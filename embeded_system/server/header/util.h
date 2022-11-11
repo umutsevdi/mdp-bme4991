@@ -20,7 +20,7 @@ enum direction {
 
 typedef struct SV_MOTION_DATA {
   enum direction dir;
-  unsigned long timestamp;
+  int timestamp;
   int c_bit;
 } sv_motion;
 
@@ -28,10 +28,10 @@ typedef struct SV_MOTION_DATA {
  * creates time stamp
  * @return the current time in milliseconds
  */
-long long util_ts();
+int util_ts();
 /**
  * generates a correction bit using xor
  */
-int util_mkbit(int dir, long long ts);
+int util_mkbit(int dir, int ts);
 
 #endif
