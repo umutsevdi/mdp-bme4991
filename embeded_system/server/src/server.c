@@ -41,8 +41,8 @@ void sv_listen(const sv_conf *args, int write_pipe) {
       sv_motion data;
       memcpy(&data, buffer, sizeof(sv_motion));
 
-      if (util_mkbit(data.dir, data.timestamp) == data.c_bit) {
-        printf("%i\tvalid data:{%d %d %d}\n", args->pid, data.dir,
+      if (util_mkbit(data.direction, data.timestamp) == data.c_bit) {
+        printf("%i\tvalid data:{%d %d %d}\n", args->pid, data.direction,
                data.timestamp, data.c_bit);
       }
 

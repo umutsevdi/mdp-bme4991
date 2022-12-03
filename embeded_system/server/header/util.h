@@ -8,18 +8,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-enum direction {
+enum DIRECTION {
   DIRECTION_NONE = -1,
   DIRECTION_LEFT = 0,
   DIRECTION_DOWN = 1,
   DIRECTION_UP = 2,
   DIRECTION_RIGHT = 3,
-  DIRECTION_LEFT_BACK = 4,
-  DIRECTION_RIGHT_BACK = 5,
 };
 
 typedef struct SV_MOTION_DATA {
-  enum direction dir;
+  enum DIRECTION direction;
   int timestamp;
   int c_bit;
 } sv_motion;
