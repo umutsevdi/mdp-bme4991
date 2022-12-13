@@ -18,7 +18,7 @@ enum DIRECTION {
 
 typedef struct SV_MOTION_DATA {
   enum DIRECTION direction;
-  int timestamp;
+  unsigned long timestamp;
   int c_bit;
 } sv_motion;
 

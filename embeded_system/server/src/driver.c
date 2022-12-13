@@ -1,12 +1,13 @@
 #include "driver.h"
 #include "util.h"
 #include <unistd.h>
-#define FIRST_MOTOR_PIN_1 1
-#define FIRST_MOTOR_PIN_2 2
-#define SECOND_MOTOR_PIN_1 3
-#define SECOND_MOTOR_PIN_2 4
+#define FIRST_MOTOR_PIN_1 27
+#define FIRST_MOTOR_PIN_2 22
+#define SECOND_MOTOR_PIN_1 23
+#define SECOND_MOTOR_PIN_2 24
 
 void dv_drive(const dv_conf *args, int read_pipe) {
+  wiringPiSetup();
   // setting pins
   pinMode(FIRST_MOTOR_PIN_1, OUTPUT);
   pinMode(FIRST_MOTOR_PIN_2, OUTPUT);
@@ -24,7 +25,7 @@ void dv_drive(const dv_conf *args, int read_pipe) {
     memcpy(&data, readbuffer, sizeof(sv_motion));
 
     printf("%i\tMessage from child: %s\n", args->pid, readbuffer);
-    printf("%i\tdata{%d %d %d}\n", args->pid, data.direction, data.timestamp,
+    printf("%i\tdata{%d %lu %d}\n", args->pid, data.direction, data.timestamp,
            data.c_bit);
 
     switch (data.direction) {

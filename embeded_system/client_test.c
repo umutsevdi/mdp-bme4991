@@ -10,7 +10,7 @@
 #define PORT 8080
 
 #define HOSTNAME "pi.local"
-#define MAXLINE 256 
+#define MAXLINE 256
 
 /**
  * Gets the IP address of the given host name
@@ -33,10 +33,10 @@ int main() {
   char msg[MAXLINE];
   sv_motion data;
 
-  scanf("%d", &data.dir);
+  scanf("%d", &data.direction);
   data.timestamp = util_ts();
-  data.c_bit = util_mkbit(data.dir, data.timestamp);
-  printf("data{%d %lu %d}\n",data.dir,data.timestamp,data.c_bit);
+  data.c_bit = util_mkbit(data.direction, data.timestamp);
+  printf("data{%d %lu %d}\n", data.direction, data.timestamp, data.c_bit);
 
   struct sockaddr_in servaddr;
 

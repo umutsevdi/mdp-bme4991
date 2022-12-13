@@ -22,11 +22,4 @@ typedef struct SV_SERVER_CONFIG {
  */
 void sv_listen(const sv_conf *args, int write_pipe);
 
-/**
- * parses incoming UDP data into a valid struct
- * @param buffer incoming message as char array
- * @return struct data
- */
-enum direction sv_motion_get_dir(short dir_x, short dir_y);
-
 #endif
