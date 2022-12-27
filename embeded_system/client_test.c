@@ -4,15 +4,16 @@
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 
-#define PORT 8081
+#define PORT 8080
 
 #define HOSTNAME "pi.local"
-#define MAXLINE 256
+#define MAXLINE 64
 
 /**
  * Gets the IP address of the given host name
@@ -28,13 +29,33 @@ char *get_ip_by_hostname(char *hostname) {
   return inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
 }
 
-int util_ts() {
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000) % 100000;
+bool send_message(int sockfd, struct sockaddr_in servaddr, char *buffer) {
+  int len = strnlen(buffer, MAXLINE);
+  enum DIRECTION data;
+  fgets(buffer, MAXLINE, stdin);
+  if (!strncmp(buffer, "NONE", 4)) {
+    data = DIRECTION_NONE;
+  } else if (!strncmp(buffer, "LEFT", 4)) {
+    data = DIRECTION_LEFT;
+  } else if (!strncmp(buffer, "DOWN", 4)) {
+    data = DIRECTION_DOWN;
+  } else if (!strncmp(buffer, "UP", 4)) {
+    data = DIRECTION_UP;
+  } else if (!strncmp(buffer, "RIGHT", 4)) {
+    data = DIRECTION_RIGHT;
+  } else if (!strncmp(buffer, "EXIT", 4)) {
+    close(sockfd);
+    printf("Exiting client\n");
+    exit(0);
+  } else {
+    perror("Unrecognized direction\n");
+  }
+  printf("data{%d}\n", data);
+  int msg_status =
+      sendto(sockfd, (const char *)&data, sizeof(data), MSG_CONFIRM,
+             (const struct sockaddr *)&servaddr, sizeof(servaddr));
+  return msg_status >= 0;
 }
-
-int util_mkbit(int dir, int ts) { return (ts % 100000) ^ dir; }
 
 // Driver code
 int main() {
@@ -43,16 +64,16 @@ int main() {
 
   char *hname = malloc(sizeof(HOSTNAME));
   strcpy(hname, HOSTNAME);
-
   char *sv_ip_address = get_ip_by_hostname(hname);
   if (sv_ip_address == NULL) {
-    perror("Error while finding given hostname " HOSTNAME ", no such entry\n");
+    perror("Error: Hostanme " HOSTNAME " was not found, no such entry\n");
+    exit(EXIT_FAILURE);
   }
-  printf("server{hostname:" HOSTNAME ", ip:%s}\n", sv_ip_address);
+  printf("Server found {hostname:" HOSTNAME ", ip:%s}\n", sv_ip_address);
 
   // Creating socket file descriptor
   if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-    perror("socket creation failed");
+    perror("Error: Socket creation failed\n");
     exit(EXIT_FAILURE);
   }
 
@@ -64,34 +85,14 @@ int main() {
   servaddr.sin_addr.s_addr = inet_addr(sv_ip_address);
 
   sv_motion data;
-  data.timestamp = util_ts();
 
-  char direction[10];
-  scanf("%s", direction);
-
-  if (!strncmp(direction, "NONE", 4)) {
-    data.direction = DIRECTION_NONE;
-  } else if (!strncmp(direction, "LEFT", 4)) {
-    data.direction = DIRECTION_LEFT;
-  } else if (!strncmp(direction, "DOWN", 4)) {
-    data.direction = DIRECTION_DOWN;
-  } else if (!strncmp(direction, "UP", 4)) {
-    data.direction = DIRECTION_UP;
-  } else if (!strncmp(direction, "RIGHT", 4)) {
-    data.direction = DIRECTION_RIGHT;
-  } else {
-    perror("Unrecognized direction");
-    exit(1);
+  printf("Connected\n");
+  char buffer[MAXLINE];
+  bool sending = true;
+  while (sending) {
+    sending = send_message(sockfd, servaddr, buffer);
   }
-  printf("data{%d %lu %d}\n", data.direction, data.timestamp, data.c_bit);
 
-  int msg_status =
-      sendto(sockfd, (const char *)&data, sizeof(data), MSG_CONFIRM,
-             (const struct sockaddr *)&servaddr, sizeof(servaddr));
-  if (msg_status == -1) {
-    perror("Error while sending the data\n");
-  }
-  printf("Message sent to server\n");
   close(sockfd);
   return 0;
 }

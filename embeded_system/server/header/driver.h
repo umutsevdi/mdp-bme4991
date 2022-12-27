@@ -10,7 +10,7 @@ typedef struct DV_DRIVE_CONFIG {
 
 } dv_conf;
 
-void dv_drive(const dv_conf *args, int read_pipe);
+void *dv_drive(void *args);
 
 void dv_stop();
 void dv_forward();

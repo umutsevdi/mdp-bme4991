@@ -7,7 +7,7 @@
 #define SECOND_MOTOR_PIN_1 23
 #define SECOND_MOTOR_PIN_2 24
 
-void dv_drive(const dv_conf *args, int read_pipe) {
+void* dv_drive(void *args) {
   wiringPiSetupGpio();
   // setting pins
   pinMode(FIRST_MOTOR_PIN_1, OUTPUT);
@@ -16,20 +16,12 @@ void dv_drive(const dv_conf *args, int read_pipe) {
   pinMode(SECOND_MOTOR_PIN_2, OUTPUT);
 
   while (1) {
-    printf("%i\tWaiting for the child\n", args->pid);
+    printf("Waiting for the child\n");
+    enum DIRECTION direction = util_get();
 
-    char readbuffer[args->max_line];
-    bzero(readbuffer, args->max_line);
-    int n = read(read_pipe, readbuffer, args->max_line);
+    printf("Direction received\n");
 
-    sv_motion data;
-    memcpy(&data, readbuffer, sizeof(sv_motion));
-
-    printf("%i\tMessage from child: %s\n", args->pid, readbuffer);
-    printf("%i\tdata{%d %lu}\n", args->pid, data.direction, data.timestamp);
-
-    printf("%i\tdirection: ", args->pid);
-    switch (data.direction) {
+    switch (direction) {
     case DIRECTION_NONE:
       printf("NONE\n");
       dv_stop();

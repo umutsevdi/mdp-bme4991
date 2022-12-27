@@ -27,4 +27,7 @@ typedef struct SV_MOTION_DATA {
  */
 int util_ts();
 
+enum DIRECTION util_get();
+void util_set(enum DIRECTION direction);
+
 #endif
