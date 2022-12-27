@@ -7,20 +7,22 @@
 #define SECOND_MOTOR_PIN_1 23
 #define SECOND_MOTOR_PIN_2 24
 
-void* dv_drive(void *args) {
+void *dv_drive(void *args) {
   wiringPiSetupGpio();
   // setting pins
   pinMode(FIRST_MOTOR_PIN_1, OUTPUT);
   pinMode(FIRST_MOTOR_PIN_2, OUTPUT);
   pinMode(SECOND_MOTOR_PIN_1, OUTPUT);
   pinMode(SECOND_MOTOR_PIN_2, OUTPUT);
+  enum DIRECTION dir_old;
 
   while (1) {
     printf("Waiting for the child\n");
     enum DIRECTION direction = util_get();
-
-    printf("Direction received\n");
-
+    if (direction != dir_old) {
+      printf("Direction received\n");
+      dir_old = direction;
+    }
     switch (direction) {
     case DIRECTION_NONE:
       printf("NONE\n");
