@@ -12,9 +12,10 @@ typedef struct DV_DRIVE_CONFIG {
 
 void dv_drive(const dv_conf *args, int read_pipe);
 
-void go();
-void go_left();
-void go_right();
-void go_back();
+void dv_stop();
+void dv_forward();
+void dv_left();
+void dv_right();
+void dv_back();
 
 #endif

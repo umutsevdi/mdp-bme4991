@@ -1,5 +1,6 @@
 #include "driver.h"
 #include "util.h"
+#include <stdio.h>
 #include <unistd.h>
 #define FIRST_MOTOR_PIN_1 27
 #define FIRST_MOTOR_PIN_2 22
@@ -7,7 +8,7 @@
 #define SECOND_MOTOR_PIN_2 24
 
 void dv_drive(const dv_conf *args, int read_pipe) {
-  wiringPiSetup();
+  wiringPiSetupGpio();
   // setting pins
   pinMode(FIRST_MOTOR_PIN_1, OUTPUT);
   pinMode(FIRST_MOTOR_PIN_2, OUTPUT);
@@ -25,23 +26,29 @@ void dv_drive(const dv_conf *args, int read_pipe) {
     memcpy(&data, readbuffer, sizeof(sv_motion));
 
     printf("%i\tMessage from child: %s\n", args->pid, readbuffer);
-    printf("%i\tdata{%d %lu %d}\n", args->pid, data.direction, data.timestamp,
-           data.c_bit);
+    printf("%i\tdata{%d %lu}\n", args->pid, data.direction, data.timestamp);
 
+    printf("%i\tdirection: ", args->pid);
     switch (data.direction) {
     case DIRECTION_NONE:
+      printf("NONE\n");
+      dv_stop();
       break;
     case DIRECTION_LEFT:
-      go_left();
+      printf("LEFT\n");
+      dv_left();
       break;
     case DIRECTION_DOWN:
-      go_back();
+      printf("DOWN\n");
+      dv_back();
       break;
     case DIRECTION_UP:
-      go();
+      printf("UP\n");
+      dv_forward();
       break;
     case DIRECTION_RIGHT:
-      go_right();
+      printf("RIGHT\n");
+      dv_right();
       break;
     }
     // wait for movement to occur
@@ -49,27 +56,33 @@ void dv_drive(const dv_conf *args, int read_pipe) {
   }
 }
 
-void go() {
+void dv_forward() {
   digitalWrite(FIRST_MOTOR_PIN_1, HIGH);
   digitalWrite(FIRST_MOTOR_PIN_2, LOW);
   digitalWrite(SECOND_MOTOR_PIN_1, LOW);
   digitalWrite(SECOND_MOTOR_PIN_2, HIGH);
 }
-void go_left() {
+void dv_left() {
   digitalWrite(FIRST_MOTOR_PIN_1, HIGH);
   digitalWrite(FIRST_MOTOR_PIN_2, LOW);
   digitalWrite(SECOND_MOTOR_PIN_1, HIGH);
   digitalWrite(SECOND_MOTOR_PIN_2, LOW);
 }
-void go_right() {
+void dv_right() {
   digitalWrite(FIRST_MOTOR_PIN_1, LOW);
   digitalWrite(FIRST_MOTOR_PIN_2, HIGH);
   digitalWrite(SECOND_MOTOR_PIN_1, LOW);
   digitalWrite(SECOND_MOTOR_PIN_2, HIGH);
 }
-void go_back() {
+void dv_back() {
   digitalWrite(FIRST_MOTOR_PIN_1, LOW);
   digitalWrite(FIRST_MOTOR_PIN_2, HIGH);
   digitalWrite(SECOND_MOTOR_PIN_1, HIGH);
+  digitalWrite(SECOND_MOTOR_PIN_2, LOW);
+}
+void dv_stop() {
+  digitalWrite(FIRST_MOTOR_PIN_1, LOW);
+  digitalWrite(FIRST_MOTOR_PIN_2, LOW);
+  digitalWrite(SECOND_MOTOR_PIN_1, LOW);
   digitalWrite(SECOND_MOTOR_PIN_2, LOW);
 }

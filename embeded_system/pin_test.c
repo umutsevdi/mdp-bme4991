@@ -5,7 +5,7 @@
 #define SECOND_MOTOR_PIN_2 24
 
 int main(int argc, char *argv[]) {
-  wiringPiSetup();
+  wiringPiSetupGpio();
 
   pinMode(FIRST_MOTOR_PIN_1, OUTPUT);
   pinMode(FIRST_MOTOR_PIN_2, OUTPUT);
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     digitalWrite(FIRST_MOTOR_PIN_2, LOW);
     digitalWrite(SECOND_MOTOR_PIN_1, LOW);
     digitalWrite(SECOND_MOTOR_PIN_2, HIGH);
-    delay(1000);
+    delay(100);
   }
 
   return 0;

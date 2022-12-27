@@ -42,8 +42,8 @@ void sv_listen(const sv_conf *args, int write_pipe) {
       memcpy(&data, buffer, sizeof(sv_motion));
 
       if (util_mkbit(data.direction, data.timestamp) == data.c_bit) {
-        printf("%i\tvalid data:{%d %lu %d}\n", args->pid, data.direction,
-               data.timestamp, data.c_bit);
+        printf("%i\tvalid data:{%d %lu}\n", args->pid, data.direction,
+               data.timestamp);
       }
 
       // Writing to the pipe
