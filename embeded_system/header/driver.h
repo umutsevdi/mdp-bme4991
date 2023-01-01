@@ -7,7 +7,6 @@
 typedef struct DV_DRIVE_CONFIG {
   pid_t pid;
   int max_line;
-
 } dv_conf;
 
 void *dv_drive(void *args);

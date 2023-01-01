@@ -1,7 +1,6 @@
 #include "driver.h"
 #include "util.h"
 #include <stdio.h>
-#include <unistd.h>
 #define FIRST_MOTOR_PIN_1 27
 #define FIRST_MOTOR_PIN_2 22
 #define SECOND_MOTOR_PIN_1 23
@@ -15,35 +14,34 @@ void *dv_drive(void *args) {
   pinMode(SECOND_MOTOR_PIN_1, OUTPUT);
   pinMode(SECOND_MOTOR_PIN_2, OUTPUT);
   enum DIRECTION dir_old;
+  printf("Driver ready\n");
 
   while (1) {
-    printf("Waiting for the child\n");
     enum DIRECTION direction = util_get();
     if (direction != dir_old) {
-      printf("Direction received\n");
       dir_old = direction;
+      printf("NEW ORDER: %d\n", direction);
     }
     switch (direction) {
     case DIRECTION_NONE:
-      printf("NONE\n");
       dv_stop();
       break;
     case DIRECTION_LEFT:
-      printf("LEFT\n");
       dv_left();
       break;
     case DIRECTION_DOWN:
-      printf("DOWN\n");
       dv_back();
       break;
     case DIRECTION_UP:
-      printf("UP\n");
       dv_forward();
       break;
     case DIRECTION_RIGHT:
-      printf("RIGHT\n");
       dv_right();
       break;
+    case DIRECTION_END:
+      printf("Driver closed\n");
+      dv_stop();
+      exit(0);
     }
     // wait for movement to occur
     delayMicroseconds(50);

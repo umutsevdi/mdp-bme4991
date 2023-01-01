@@ -4,16 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 enum DIRECTION {
-  DIRECTION_NONE = -1,
-  DIRECTION_LEFT = 0,
-  DIRECTION_DOWN = 1,
-  DIRECTION_UP = 2,
-  DIRECTION_RIGHT = 3,
+  DIRECTION_END = -1,
+  DIRECTION_NONE,
+  DIRECTION_LEFT,
+  DIRECTION_DOWN,
+  DIRECTION_UP,
+  DIRECTION_RIGHT,
 };
 
 typedef struct SV_MOTION_DATA {

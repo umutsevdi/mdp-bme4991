@@ -39,11 +39,15 @@ bool send_message(int sockfd, struct sockaddr_in servaddr, char *buffer) {
     data = DIRECTION_LEFT;
   } else if (!strncmp(buffer, "DOWN", 4)) {
     data = DIRECTION_DOWN;
-  } else if (!strncmp(buffer, "UP", 4)) {
+  } else if (!strncmp(buffer, "UP", 2)) {
     data = DIRECTION_UP;
   } else if (!strncmp(buffer, "RIGHT", 4)) {
     data = DIRECTION_RIGHT;
   } else if (!strncmp(buffer, "EXIT", 4)) {
+    data = DIRECTION_END;
+    int msg_status =
+        sendto(sockfd, (const char *)&data, sizeof(data), MSG_CONFIRM,
+               (const struct sockaddr *)&servaddr, sizeof(servaddr));
     close(sockfd);
     printf("Exiting client\n");
     exit(0);
@@ -65,6 +69,7 @@ int main() {
   char *hname = malloc(sizeof(HOSTNAME));
   strcpy(hname, HOSTNAME);
   char *sv_ip_address = get_ip_by_hostname(hname);
+  // "192.168.1.203";
   if (sv_ip_address == NULL) {
     perror("Error: Hostanme " HOSTNAME " was not found, no such entry\n");
     exit(EXIT_FAILURE);
