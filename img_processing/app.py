@@ -20,6 +20,9 @@ class DIRECTION(Enum):
     RIGHT = 4
 
 
+frame_directions: list[DIRECTION] = []
+
+
 def set_udp(hostname: str, port: int):
     new_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     addr = socket.gethostbyname(hostname)
@@ -53,6 +56,26 @@ def get_direction(left_eye, right_eye, gaze_left) -> DIRECTION:
     else:
         direction = DIRECTION.UP
     return direction
+
+
+def get_max_direction() -> DIRECTION:
+    global frame_directions
+    m: dict[DIRECTION, int] = {
+        DIRECTION.LEFT: 0,
+        DIRECTION.UP: 0,
+        DIRECTION.DOWN: 0,
+        DIRECTION.RIGHT: 0,
+        DIRECTION.NONE: 0,
+    }
+    for i in frame_directions:
+        m[i] += 1
+    frame_directions.clear()
+
+    max_dir = DIRECTION.NONE
+    for i in m.keys():
+        if m[i] > m[max_dir]:
+            max_dir = i
+    return max_dir
 
 
 def get_blinking_ratio(eye_points, facial_landmarks):
@@ -121,7 +144,7 @@ def stream_frame():
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
     while True:
-        global frame, gray
+        global frame, gray, frame_directions
         _, frame = cap.read()
         #  new_frame = np.zeros((500, 500, 3), np.uint8)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -145,18 +168,18 @@ def stream_frame():
             gaze_ratio_left_eye = get_gaze_ratio([36, 37, 38, 39, 40, 41], landmarks)
             gaze_ratio_right_eye = get_gaze_ratio([42, 43, 44, 45, 46, 47], landmarks)
             gaze_ratio = (gaze_ratio_right_eye + gaze_ratio_left_eye) / 2
-            print("gaze_left:", str(gaze_ratio_left_eye), "\tgaze_right", str(
-                gaze_ratio_right_eye),
-                  "blink_left:", str(left_eye_ratio), "\tblink_right:", str(
-                    right_eye_ratio))
-
             direction = get_direction(left_eye_ratio, right_eye_ratio, gaze_ratio_left_eye)
+            frame_directions.append(direction)
+            if len(frame_directions) >= 10:
+                send(get_max_direction())
+
             cv2.putText(frame, direction.name, (50, 150), font, 4, (255, 0, 0), 2)
 
         cv2.imshow("Frame", frame)
         # cv2.imshow("New frame", new_frame)
         key = cv2.waitKey(1)
         if key == 27:
+            send(DIRECTION.END)
             break
 
     cap.release()
