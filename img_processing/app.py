@@ -12,12 +12,12 @@ gray = None
 
 
 class DIRECTION(Enum):
-    END = -1
     NONE = 0
     LEFT = 1
     DOWN = 2
     UP = 3
     RIGHT = 4
+    END = 5
 
 
 frame_directions: list[DIRECTION] = []
@@ -33,8 +33,8 @@ def set_udp(hostname: str, port: int):
 def send(direction: DIRECTION):
     global sock
     message = str(direction.value).encode()
-    print(message, direction, direction.value)
-    # sock.send(message)
+    print(message)
+    sock.send(message)
 
 
 def midpoint(p1, p2):
@@ -188,7 +188,7 @@ def stream_frame():
 
 def main():
     global sock
-    # sock = set_udp("pi.local", 8080)
+    sock = set_udp("pi.local", 8080)
     stream_frame()
 
 
