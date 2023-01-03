@@ -16,8 +16,7 @@ typedef struct SV_SERVER_CONFIG {
 
 /**
  * creates a UDP server, must be executed in a  separate process
- * @param args sv_conf pointer arguments of server in server configuration
- * @param write_pipe write file descriptor for the server
+ * @args sv_conf pointer arguments of server in server configuration
  */
 void *sv_listen(void *args);
 

@@ -32,37 +32,5 @@ int main(int argc, char *argv[]) {
   if (pthread_join(dv_thread, NULL)) {
     printf("Error: Could not join driver thread\n");
   }
-  /*
-
-  int sv_pipe[2];
-  pipe(sv_pipe);
-
-  pid_t childpid = fork();
-
-  if (!childpid) {
-    const dv_conf conf = {
-        .pid = getpid(),
-        .max_line = MAX_LINE,
-    };
-    printf("%i\tStarting up embedded driver{buffer_size: %d}}\n", conf.pid,
-           conf.max_line);
-    close(sv_pipe[1]);
-    dv_drive(&conf, sv_pipe[0]);
-    // parent
-  } else {
-    close(sv_pipe[0]);
-    const sv_conf conf = {
-        .pid = getpid(),
-        .port = PORT,
-        .max_line = MAX_LINE,
-        .write_pipe = sv_pipe[1],
-    };
-    printf("%i\tStarting UDP server{port: %d, buffer_size: %d}\n", conf.pid,
-           conf.port, conf.max_line);
-    sv_listen(&conf);
-  }
-
-  */
-
   return 0;
 }
