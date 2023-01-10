@@ -18,18 +18,37 @@ enum DIRECTION {
   DIRECTION_END,
 };
 
-typedef struct SV_MOTION_DATA {
-  enum DIRECTION direction;
-  unsigned long timestamp;
-} sv_motion;
+enum SEVERITY { SEVERITY_LOW, SEVERITY_HIGH };
+
+typedef struct LOGGER {
+  enum SEVERITY sev;
+} logger;
 
 /**
- * creates time stamp
- * @return the current time in milliseconds
+ * logger_new - generates a new logger
+ * @sev minimum severity to display
+ *
  */
-int util_ts();
+logger *logger_new(enum SEVERITY sev);
 
+/**
+ * log_f - printf like logging function with SEVERITY control. If the severity
+ * is set to SEVERITY_LOW all log messages will be displayed. Else only
+ * SEVERITY_HIGH messages will be displayed
+ * @sev Severity of the log message
+ * @fmt print format
+ * @arguments... list of arguments to replace on fmt
+ *
+ */
+void log_f(struct LOGGER *this, enum SEVERITY sev, const char *fmt, ...);
+
+/**
+ * gets the direction value
+ */
 enum DIRECTION util_get();
+/**
+ * sets the direction value
+ */
 void util_set(enum DIRECTION direction);
 
 #endif

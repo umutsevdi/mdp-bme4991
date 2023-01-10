@@ -8,18 +8,17 @@ void sv_handle(int sockfd, struct sockaddr_in cliaddr, const sv_conf *sv_args) {
   int n = recvfrom(sockfd, (char *)buffer, sv_args->max_line, MSG_WAITALL,
                    (struct sockaddr *)&cliaddr, &len);
   if (n > 0) {
-    printf("%ul:%d\t Message received: \n", cliaddr.sin_addr.s_addr,
-           cliaddr.sin_port);
-    sv_motion data;
-    memcpy(&data.direction, buffer, sizeof(n));
-    printf("%d\n", data.direction);
-    util_set(data.direction);
+    log_f(sv_args->log, SEVERITY_HIGH, "%ul:%d\t Message received: \n",
+          cliaddr.sin_addr.s_addr, cliaddr.sin_port);
+    enum DIRECTION data;
+    memcpy(&data, buffer, sizeof(n));
+    printf("%d\n", data);
+    util_set(data);
   }
 }
 
 void *sv_listen(void *args) {
   const sv_conf *sv_args = (sv_conf *)args;
-  long long ts = util_ts();
   int sockfd;
   struct sockaddr_in servaddr, cliaddr;
   // Creating socket file descriptor
@@ -41,10 +40,12 @@ void *sv_listen(void *args) {
     perror("Error: Bind failed\n");
     exit(EXIT_FAILURE);
   }
-  printf("Server ready\n");
+  log_f(sv_args->log, SEVERITY_HIGH, "UDP Server started at: %s:%d\n",
+        servaddr.sin_addr.s_addr, sv_args->port);
   while (util_get() != DIRECTION_END) {
-    printf("Listening\n");
+    log_f(sv_args->log, SEVERITY_LOW, "Server is listening\n");
     sv_handle(sockfd, cliaddr, sv_args);
   }
+  log_f(sv_args->log, SEVERITY_LOW, "END received, closing server\n");
   return NULL;
 }

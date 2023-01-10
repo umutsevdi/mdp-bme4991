@@ -6,7 +6,19 @@
 #define SECOND_MOTOR_PIN_1 23
 #define SECOND_MOTOR_PIN_2 24
 
+/* handles DIRECTION_NONE*/
+void dv_stop();
+/* handles DIRECTION_UP*/
+void dv_forward();
+/* handles DIRECTION_LEFT*/
+void dv_left();
+/* handles DIRECTION_RIGHT*/
+void dv_right();
+/* handles DIRECTION_RIGHT*/
+void dv_back();
+
 void *dv_drive(void *args) {
+  const dv_conf *dv_args = (dv_conf *)args;
   wiringPiSetupGpio();
   // setting pins
   pinMode(FIRST_MOTOR_PIN_1, OUTPUT);
@@ -14,13 +26,13 @@ void *dv_drive(void *args) {
   pinMode(SECOND_MOTOR_PIN_1, OUTPUT);
   pinMode(SECOND_MOTOR_PIN_2, OUTPUT);
   enum DIRECTION dir_old;
-  printf("Driver ready\n");
+  log_f(dv_args->log, SEVERITY_HIGH, "Driver is ready\n");
 
   while (1) {
     enum DIRECTION direction = util_get();
     if (direction != dir_old) {
       dir_old = direction;
-      printf("NEW ORDER: %d\n", direction);
+      log_f(dv_args->log, SEVERITY_HIGH, "New Command: %d\n", direction);
     }
     switch (direction) {
     case DIRECTION_NONE:
