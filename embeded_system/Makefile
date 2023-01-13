@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 PROG= bin/server
 LIB= $(wildcard header/*.h)
-CLIB= $(wildcard header/*.gch)
+CLIB= $(wildcard header/*.h.gch)
 SRC= $(wildcard src/*.c)
 OBJ= $(wildcard obj/*.o)
 build: $(OBJ) 
@@ -12,6 +12,5 @@ compile: $(SRC) $(LIB)
 	if [ `uname -n` = "pi" ]; then sed -i "s/\"wiringPi\.h\"/<wiringPi.h>/g" header/driver.h; fi
 	gcc -c $(SRC) $(LIB) -Iheader
 	mv *.o obj
-clean: 
-	rm $(PROG) $(OBJ) 2> /dev/null
-	rm $(CLIB) 2> /dev/null
+clean:
+	rm $(PROG) $(OBJ) $(CLIB) 2> /dev/null
