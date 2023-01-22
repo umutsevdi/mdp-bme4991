@@ -6,7 +6,7 @@
 <p align="center">  
 A robot that can move with the eye movements of the owner. 
   <br/>
-    <i>Developed by <a href="https://github.com/umutsevdi">Umut Sevdi</a></i>, 
+    <i>Developed by <a href="https://github.com/umutsevdi">Umut Sevdi</a></i> 
 <p align="center"><a href="doc/Rapor.pdf"><strong>Explore the docs »
 </strong></a></p>
 
