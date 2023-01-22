@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/umutsevdi/mdp_bme4991">
-  <h3 align="center">A</h3>
+  <h3 align="center">Eye Tracking Robot</h3>
   </a>
 
 <p align="center">  
@@ -98,25 +98,26 @@ enum DIRECTION {
 I initially developed the embedded system as multi-process to make the car continue moving while listening.
 Then it was refactored to a multi-thread to reduce the overhead.
 In this way, the car control system can directly access incoming messages without the need of a `pipe`
-```[c](c.md)
-  const sv_conf conf = {
-      .max_line = MAX_LINE,
-      .port = PORT,
-      .log = log,
-  };
-  const dv_conf d_conf = {
-      .log = log,
-  };
 
-  if (pthread_create(&sv_thread, NULL, sv_listen, (void *)&conf)) {
-    printf("Error: Can not create UDP listener thread\n");
-    exit(EXIT_FAILURE);
-  }
+```c
+const sv_conf conf = {
+    .max_line = MAX_LINE,
+    .port = PORT,
+    .log = log,
+};
+const dv_conf d_conf = {
+    .log = log,
+};
 
-  if (pthread_create(&dv_thread, NULL, dv_drive, (void *)&d_conf)) {
-    printf("Error: Can not create driver thread\n");
-    exit(EXIT_FAILURE);
-  }
+if (pthread_create(&sv_thread, NULL, sv_listen, (void *)&conf)) {
+  printf("Error: Can not create UDP listener thread\n");
+  exit(EXIT_FAILURE);
+}
+
+if (pthread_create(&dv_thread, NULL, dv_drive, (void *)&d_conf)) {
+  printf("Error: Can not create driver thread\n");
+  exit(EXIT_FAILURE);
+}
 ```
 
 The car movement module performs the relevant function according to the incoming message. 
