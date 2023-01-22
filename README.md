@@ -72,8 +72,6 @@ the obtained data is transferred to the Raspberry Pi via WiFi using the UDP prot
 socket library. The Raspberry Pi identifies itself on the network with the hostname "pi",
 so even if the IP address changes, the device can still be recognized.
 
-<p align="center"><img src="img/detection.png" width=300px alt="Detection"></p>
-
 #### Embedded System
 
 In this project, the `GPIO` pins on the Raspberry Pi Zero are connected to the motor driver circuit
